@@ -4,7 +4,7 @@ import urllib
 
 def lambda_handler(event, context):
 	urllib.urlretrieve("https://packagecloud.io/mrtazz/pocketcleaner/packages/el/7/pocketcleaner-0.1.2-1.x86_64.rpm/download", "/tmp/download.rpm")
-	print os.system("cd /tmp && rpm2cpio download.rpm | cpio -idmv")
+	os.system("cd /tmp && rpm2cpio download.rpm | cpio -idmv")
 
 	config_path = "%s/%s" % ("/tmp", ".pocketcleaner.ini")
 
