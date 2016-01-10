@@ -1,0 +1,30 @@
+import boto3
+import os
+import urllib
+
+def lambda_handler(event, context):
+	urllib.urlretrieve("https://packagecloud.io/mrtazz/pocketcleaner/packages/el/7/pocketcleaner-0.1.2-1.x86_64.rpm/download", "/tmp/download.rpm")
+	print os.system("cd /tmp && rpm2cpio download.rpm | cpio -idmv")
+
+	config_path = "%s/%s" % ("/tmp", ".pocketcleaner.ini")
+
+	write_config(config_path)
+
+	execute_pocket_cleaner()
+
+
+
+def write_config(config_path):
+	config_content = '''
+consumer_key      = {{ pocketcleaner_consumer_key }}
+access_token      = {{ pocketcleaner_access_token }}
+keep_count        = {{ pocketcleaner_keep_count }}
+'''
+	file_handler = open(config_path, "w+")
+	file_handler.write(config_content)
+	file_handler.close()
+
+def execute_pocket_cleaner():
+	# the config flag of the used version is not working, so we need to inject the HOME env as a hack
+	print os.system("HOME=/tmp /tmp/usr/bin/pocketcleaner")
+

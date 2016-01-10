@@ -1,0 +1,26 @@
+---
+
+- command: "zip -j tmp/{{ function_name }}.zip tmp/{{ function_name }}.py"
+
+- command: "aws lambda create-function
+    --function-name {{ function_name }}
+    --runtime {{ runtime | default('python2.7') }}
+    --role {{ execution_role_arn }}
+    --handler {{ function_name }}.lambda_handler
+    --zip-file fileb://tmp/{{ function_name }}.zip
+    --timeout {{ timeout | default(60) }}
+    --region {{ aws_region }}"
+  register: result
+  failed_when: >
+    result.rc != 0 and ('Function already exist' not in result.stderr)
+  changed_when: "result.rc == 0"
+
+- command: "aws lambda update-function-configuration
+    --function-name {{ function_name }}
+    --timeout {{ timeout | default(60) }}
+    --region {{ aws_region }}"
+
+- command: "aws lambda update-function-code
+    --function-name {{ function_name }}
+    --zip-file fileb://tmp/{{ function_name }}.zip
+    --region {{ aws_region }}"

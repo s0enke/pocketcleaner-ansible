@@ -2,19 +2,27 @@
    hosts: localhost
    connection: local
    gather_facts: False
+   vars:
+     aws_lambda_function_name: pocketcleaner_wrapper
 
    tasks: 
    - include_vars: "{{ item }}"
      with_fileglob: vars/*
- 
-   - ec2:
-       key_name: "{{ aws_ec2_keyname }}"
-       vpc_subnet_id: "{{ aws_vpc_subnet }}"
-       instance_type: t2.nano
-       image: "{{ aws_ec2_image }}" 
-       wait: yes
-       region: "{{ aws_region }}"
-       assign_public_ip: true
-       instance_tags:
-         Name: pocketcleaner
+
+   - file: path=tmp state=directory
+
+   - template:
+       src: "{{ aws_lambda_function_name }}.py.j2"
+       dest: "tmp/{{ aws_lambda_function_name }}.py"
+
+   - include: roles/include/tasks/lambda.yml
+     vars:
+       function_name: "{{ aws_lambda_function_name }}"
+       execution_role_arn: "{{ aws_lambda_execution_role_arn }}"
+       timeout: 300
+
+   - name: cleanup tmp dir
+     file:
+       path: tmp
+       state: absent
 
