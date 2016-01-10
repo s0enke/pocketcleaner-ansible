@@ -1,0 +1,20 @@
+ - name: Deploy pocketcleaner
+   hosts: localhost
+   connection: local
+   gather_facts: False
+
+   tasks: 
+   - include_vars: "{{ item }}"
+     with_fileglob: vars/*
+ 
+   - ec2:
+       key_name: "{{ aws_ec2_keyname }}"
+       vpc_subnet_id: "{{ aws_vpc_subnet }}"
+       instance_type: t2.nano
+       image: "{{ aws_ec2_image }}" 
+       wait: yes
+       region: "{{ aws_region }}"
+       assign_public_ip: true
+       instance_tags:
+         Name: pocketcleaner
+

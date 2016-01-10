@@ -1,0 +1,2 @@
+http://releases.ansible.com/ansible/ansible-2.0.0-0.6.rc1.tar.gz
+boto
