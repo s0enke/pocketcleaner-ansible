@@ -15,10 +15,15 @@
        src: "{{ aws_lambda_function_name }}.py.j2"
        dest: "tmp/{{ aws_lambda_function_name }}.py"
 
-   - include: roles/include/tasks/lambda.yml
-     vars:
-       function_name: "{{ aws_lambda_function_name }}"
-       execution_role_arn: "{{ aws_lambda_execution_role_arn }}"
+   - command: "zip -j tmp/{{ aws_lambda_function_name }}.zip tmp/{{ aws_lambda_function_name }}.py"
+
+   - lambda:
+       name: "{{ aws_lambda_function_name }}"
+       state: present
+       path: "tmp/{{ aws_lambda_function_name }}.zip"
+       runtime: 'python2.7'
+       role_arn: "{{ aws_lambda_execution_role_arn }}"
+       handler: "{{ aws_lambda_function_name }}.lambda_handler"
        timeout: 300
 
    - name: cleanup tmp dir
